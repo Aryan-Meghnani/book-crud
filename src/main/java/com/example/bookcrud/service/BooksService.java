@@ -43,6 +43,15 @@ public class BooksService {
         return bookFound;
     }
 
+
+    public List<Book> getBookByUserId(int id) {
+        List<Book> bookFound = booksRepository.findByUserId(id);
+        if (bookFound == null)
+            throw new NotFoundException(602, "No Book Found with UserID: " + id);
+        return bookFound;
+    }
+
+
     public List<Book> getBookByName(String name) {
         List<Book> booksFound = booksRepository.findByName(name);
         if (booksFound.isEmpty()||name ==null)
@@ -74,6 +83,14 @@ public class BooksService {
             throw new NotFoundException(602, "No Book Found with ID : " + id);
         booksRepository.deleteById(id);
         return "Book Removed at id " + id;
+    }
+
+    public String removeBookByUserID(int userId) {
+        List<Book> booksFound = booksRepository.findByUserId(userId);
+        if (booksFound.isEmpty())
+            throw new NotFoundException(602, "No Book Found with ID : " + userId);
+        booksRepository.deleteById(userId);
+        return "Book Removed at id " + userId;
     }
 
     public Book updateBook(Book book, int id) {

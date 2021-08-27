@@ -2,8 +2,10 @@ package com.example.bookcrud.entity;
 
 import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import javax.persistence.*;
 
@@ -26,4 +28,6 @@ public class Book {
     String isbn;
     @NotNull
     int copies;
+    @NotNull
+    int userId;
 }

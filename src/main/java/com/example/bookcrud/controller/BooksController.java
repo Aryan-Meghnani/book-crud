@@ -1,12 +1,15 @@
 package com.example.bookcrud.controller;
 
 import com.example.bookcrud.entity.Book;
+import com.example.bookcrud.entity.BookWithUser;
+import com.example.bookcrud.entity.Users;
 import com.example.bookcrud.service.BooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -14,6 +17,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/books")
@@ -44,11 +48,32 @@ public class BooksController {
         return new ResponseEntity<>(decodeBooks(books), HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{userid}")
 
     public ResponseEntity<Book> findBookById(@PathVariable int id) throws UnsupportedEncodingException {
         Book bookRetrieved = booksService.getBookById(id);
         return new ResponseEntity<>(decodeBook(bookRetrieved),HttpStatus.OK);
+    }
+
+    @GetMapping("/user/{userid}")
+
+    public ResponseEntity<List<BookWithUser>> findBookByUserId(@PathVariable int userid) throws UnsupportedEncodingException {
+
+        RestTemplate restTemplate = new RestTemplate();
+//        Users users = restTemplate.getForObject("http://localhost:3000/users", Users.class);
+
+        List<Book> booksRetrieved = booksService.getBookByUserId(userid);
+        List<BookWithUser> bookWithUserName = booksRetrieved.stream().map(book->{
+            Users user =restTemplate.getForObject("http://localhost:3000/users/"+book.getUserId(), Users.class);
+            System.out.println(user+""+book.getUserId());
+            try {
+                return new BookWithUser(decodeBook(book),user);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }).collect(Collectors.toList());
+        return new ResponseEntity<>(bookWithUserName,HttpStatus.OK);
     }
 
     //get mapping for getting the value
@@ -73,13 +98,13 @@ public class BooksController {
     }
 
     // for update there is put mapping
-    @PutMapping("/{id}")
+    @PutMapping("/{userid}")
     public ResponseEntity<Book> updateBook(@RequestBody Book book,@PathVariable int id) throws UnsupportedEncodingException {
         Book bookRetrived = booksService.updateBook(encodeBook(book),id);
         return new ResponseEntity<>(decodeBook(bookRetrived),HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{userid}")
     public ResponseEntity<String> removeBook(@PathVariable int id){
         String status = booksService.removeBook(id);
         return new ResponseEntity<>(status, HttpStatus.ACCEPTED);
@@ -108,7 +133,8 @@ public class BooksController {
         String author = URLDecoder.decode(book.getAuthor(), StandardCharsets.UTF_8.name());
         String isbn = URLDecoder.decode(book.getIsbn(), StandardCharsets.UTF_8.name());
         int copies = book.getCopies();
-        return new Book(id,name,author,isbn,copies);
+        int userId = book.getUserId();
+        return new Book(id,name,author,isbn,copies,userId);
     }
 
     Book encodeBook(Book book) throws UnsupportedEncodingException {
@@ -117,7 +143,8 @@ public class BooksController {
         String author = URLEncoder.encode(book.getAuthor(), StandardCharsets.UTF_8.name());
         String isbn = URLEncoder.encode(book.getIsbn(), StandardCharsets.UTF_8.name());
         int copies = book.getCopies();
-        return new Book(id,name,author,isbn,copies);
+        int userId = book.getUserId();
+        return new Book(id,name,author,isbn,copies,userId);
     }
 
 
