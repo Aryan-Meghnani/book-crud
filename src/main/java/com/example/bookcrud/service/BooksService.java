@@ -101,6 +101,7 @@ public class BooksService {
         existingBook.setAuthor(book.getAuthor());
         existingBook.setIsbn(book.getIsbn());
         existingBook.setCopies(book.getCopies());
+        existingBook.setUserId(book.getUserId());
         return booksRepository.save(existingBook);
     }
 }

@@ -48,15 +48,13 @@ public class BooksController {
         return new ResponseEntity<>(decodeBooks(books), HttpStatus.OK);
     }
 
-    @GetMapping("/{userid}")
-
+    @GetMapping("/{id}")
     public ResponseEntity<Book> findBookById(@PathVariable int id) throws UnsupportedEncodingException {
         Book bookRetrieved = booksService.getBookById(id);
         return new ResponseEntity<>(decodeBook(bookRetrieved),HttpStatus.OK);
     }
 
     @GetMapping("/user/{userid}")
-
     public ResponseEntity<List<BookWithUser>> findBookByUserId(@PathVariable int userid) throws UnsupportedEncodingException {
 
         RestTemplate restTemplate = new RestTemplate();
@@ -98,15 +96,15 @@ public class BooksController {
     }
 
     // for update there is put mapping
-    @PutMapping("/{userid}")
+    @PutMapping("/{id}")
     public ResponseEntity<Book> updateBook(@RequestBody Book book,@PathVariable int id) throws UnsupportedEncodingException {
         Book bookRetrived = booksService.updateBook(encodeBook(book),id);
         return new ResponseEntity<>(decodeBook(bookRetrived),HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/{userid}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> removeBook(@PathVariable int id){
-        String status = booksService.removeBook(id);
+        String status = booksService.removeBookByUserID(id);
         return new ResponseEntity<>(status, HttpStatus.ACCEPTED);
     }
 
